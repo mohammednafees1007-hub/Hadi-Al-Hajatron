@@ -1,94 +1,109 @@
 # MapTestCode
 
-MapTestCode is a small robotics mapping project that connects a Python desktop GUI with an Arduino motor controller. The robot explores a grid, reads three IR sensors, marks free and blocked cells, saves the discovered map, and can then plan an A* path through that map.
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Arduino](https://img.shields.io/badge/Arduino-Firmware-00979D?style=for-the-badge&logo=arduino&logoColor=white)
+![Tkinter](https://img.shields.io/badge/GUI-Tkinter-2E7D32?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active-0F766E?style=for-the-badge)
 
-The project has three main parts:
+**A Python + Arduino robot mapping system with live frontier exploration, IR obstacle sensing, encoder-based movement, saved map output, and A* path planning.**
 
-- `MasterMotorControl_IR.ino`: Arduino motor, encoder, command queue, and IR sensor firmware.
-- `MapTest_1.py`: live Tkinter mapping GUI that talks to the Arduino and saves `latest_map.json`.
-- `AStarPathPlanner.py`: Tkinter A* planner that loads `latest_map.json`, lets you select start/goal cells, builds movement commands, and can send them to the Arduino.
+MapTestCode connects a desktop Python GUI to an Arduino-powered robot. The robot explores a 4x4 grid, reads front/left/right IR sensors, marks free and blocked cells, saves the discovered map, and then uses A* to plan a route through the explored world.
 
-There is also `sim_3.html`, a browser-based mapping algorithm simulation/demo.
+## Highlights
 
-## Project Files
-
-| File | Purpose |
+| Feature | What It Does |
 | --- | --- |
-| `MasterMotorControl_IR.ino` | Arduino firmware for motor movement, encoder counting, 90 degree turns, IR readings, and serial commands. |
-| `MapTest_1.py` | Live frontier-based exploration GUI for a 4x4 grid. Reads IR data from Arduino and updates the map. |
-| `AStarPathPlanner.py` | Loads the saved map and calculates a shortest path using A*. Converts the path into `F`, `L`, and `R` Arduino commands. |
-| `latest_map.json` | Saved map output from the mapping GUI. It stores the grid, robot position, and robot heading. |
-| `sim_3.html` | Standalone HTML simulation for visualizing the mapping algorithm in a browser. |
-| `.gitignore` | Keeps Python cache files out of Git. |
+| Live mapping GUI | Shows the robot, heading, IR readings, frontier cells, and planned path in real time. |
+| Arduino motor firmware | Drives forward moves and 90 degree turns using encoder counts. |
+| IR obstacle sensing | Reads front, left, and right sensors through a simple serial request. |
+| Frontier-based exploration | Chooses the nearest unknown frontier next to known free space. |
+| A* route planner | Loads the saved map, lets you choose start/goal cells, and creates Arduino commands. |
+| Browser simulation | Provides a standalone HTML mapping visualization demo. |
 
-## Hardware Overview
+## Repository Layout
+
+```text
+MapTestCode/
+|-- AStarPathPlanner.py        # Tkinter A* path planner and command sender
+|-- MapTest_1.py               # Live robot mapping GUI
+|-- MasterMotorControl_IR.ino  # Arduino motor, encoder, IR, and serial firmware
+|-- latest_map.json            # Saved mapping output
+|-- sim_3.html                 # Standalone browser simulation
+|-- .gitignore                 # Python cache ignore rules
+`-- README.md                  # Project documentation
+```
+
+## System Flow
+
+```mermaid
+flowchart LR
+    A["Arduino robot"] -->|"IR readings: F,L,R"| B["MapTest_1.py"]
+    B -->|"movement command: F/R/L/S/I"| A
+    B -->|"saves map"| C["latest_map.json"]
+    C --> D["AStarPathPlanner.py"]
+    D -->|"A* path"| E["command string"]
+    E -->|"optional send"| A
+    F["sim_3.html"] -->|"visual demo"| G["browser"]
+```
+
+## Hardware
 
 The Arduino sketch expects:
 
-- Two DC motors controlled by PWM pins.
+- Two DC motors connected through a PWM motor driver.
 - Left and right wheel encoders.
 - Three IR obstacle sensors: front, left, and right.
-- USB serial connection between the computer and Arduino.
+- USB serial connection to the Windows laptop.
 
-### Arduino Pin Mapping
+### Pin Map
 
-Motor driver pins:
+| Group | Signal | Arduino Pin |
+| --- | --- | --- |
+| Left motor | `L_RPWM` | 5 |
+| Left motor | `L_LPWM` | 6 |
+| Right motor | `R_RPWM` | 10 |
+| Right motor | `R_LPWM` | 11 |
+| Left encoder | `ENC_L_A` | 2 |
+| Left encoder | `ENC_L_B` | 4 |
+| Right encoder | `ENC_R_A` | 3 |
+| Right encoder | `ENC_R_B` | 7 |
+| IR sensor | Front | 9 |
+| IR sensor | Left | 8 |
+| IR sensor | Right | 12 |
 
-| Signal | Arduino Pin |
-| --- | --- |
-| `L_RPWM` | 5 |
-| `L_LPWM` | 6 |
-| `R_RPWM` | 10 |
-| `R_LPWM` | 11 |
-
-Encoder pins:
-
-| Signal | Arduino Pin |
-| --- | --- |
-| `ENC_L_A` | 2 |
-| `ENC_L_B` | 4 |
-| `ENC_R_A` | 3 |
-| `ENC_R_B` | 7 |
-
-IR sensor pins:
-
-| Sensor | Arduino Pin |
-| --- | --- |
-| Front IR | 9 |
-| Left IR | 8 |
-| Right IR | 12 |
-
-The sketch is configured for digital IR sensors by default:
+IR sensors are configured as digital sensors by default:
 
 ```cpp
 const bool IR_USE_ANALOG = false;
 const bool IR_OBSTACLE_IS_LOW = true;
 ```
 
-With this setting, each IR sensor returns:
+IR values use this convention:
 
-- `0` = obstacle detected
-- `1` = free space
+| Value | Meaning |
+| --- | --- |
+| `0` | Obstacle detected |
+| `1` | Free space |
 
-## Arduino Command Protocol
+## Arduino Serial Protocol
 
-The Python scripts communicate with the Arduino using serial at `115200` baud.
+Baud rate: `115200`
 
 | Command | Meaning |
 | --- | --- |
 | `F` | Move forward by `FORWARD_DISTANCE_CM`. |
 | `R` | Turn right 90 degrees. |
 | `L` | Turn left 90 degrees. |
-| `S` | Emergency stop and clear command queue. |
+| `S` | Emergency stop and clear the command queue. |
 | `I` | Return IR readings as `front,left,right`. |
 
-The Arduino accepts both uppercase and lowercase commands. It can also queue combined command strings such as:
+The Arduino accepts uppercase or lowercase commands and can queue combined strings:
 
 ```text
 FRFFL
 ```
 
-The Arduino prints movement completion messages like:
+Movement completion is reported with messages like:
 
 ```text
 DONE: Forward 60.00 cm
@@ -96,11 +111,11 @@ DONE: Right 90 degree
 DONE: Left 90 degree
 ```
 
-The Python mapping loop waits for these `DONE:` messages before updating the robot state and requesting the next IR reading.
+`MapTest_1.py` waits for `DONE:` before updating the robot position and requesting the next IR reading.
 
-## Motor Calibration
+## Calibration
 
-The Arduino sketch uses calibrated encoder counts for movement:
+Current encoder calibration:
 
 ```cpp
 const float FORWARD_DISTANCE_CM = 60.0;
@@ -110,90 +125,86 @@ const long LEFT_TURN_90  = 734;
 const long RIGHT_TURN_90 = 719;
 ```
 
-Only change `FORWARD_DISTANCE_CM` if you want a different forward step distance. The left/right calibration constants should stay matched to the real robot hardware unless you recalibrate the motors and encoders.
+Only change `FORWARD_DISTANCE_CM` for a different step size. Keep the encoder constants unchanged unless the robot is recalibrated.
 
-## Python Requirements
+## Requirements
 
-The Python scripts use:
+| Tool | Purpose |
+| --- | --- |
+| Python 3 | Runs the mapping and planner GUIs. |
+| Tkinter | Desktop GUI framework included with most Python installs. |
+| pyserial | Serial communication between Python and Arduino. |
+| Arduino IDE | Uploads `MasterMotorControl_IR.ino` to the board. |
 
-- Python 3
-- Tkinter
-- pyserial
-
-Install pyserial if it is missing:
+Install Python dependency:
 
 ```powershell
 pip install pyserial
 ```
 
-Tkinter is included with most standard Python installations on Windows.
+## Quick Start
 
-## Setup
+### 1. Upload Arduino Firmware
 
-1. Open `MasterMotorControl_IR.ino` in the Arduino IDE.
-2. Select the correct Arduino board and COM port.
-3. Upload the sketch to the Arduino.
-4. Close Arduino Serial Monitor and Serial Plotter before running the Python scripts. Only one program can use the COM port at a time.
-5. Keep the Arduino connected by USB.
+1. Open `MasterMotorControl_IR.ino` in Arduino IDE.
+2. Select the correct board and COM port.
+3. Upload the sketch.
+4. Close Arduino Serial Monitor and Serial Plotter.
+5. Keep the Arduino connected over USB.
 
-The Python code auto-detects likely Arduino serial ports. If auto-detection does not choose the correct port, edit this line in the Python file you are running:
-
-```python
-SERIAL_PORT = None
-```
-
-For example:
-
-```python
-SERIAL_PORT = "COM3"
-```
-
-## Run The Live Mapping GUI
-
-Run:
+### 2. Run Live Mapping
 
 ```powershell
 cd "C:\Users\moham\OneDrive\Desktop\MapTestCode"
 python MapTest_1.py
 ```
 
-What it does:
+The mapper:
 
-1. Connects to the Arduino over serial.
-2. Shows a 4x4 grid in a Tkinter window.
-3. Requests IR readings using the `I` command.
-4. Marks cells as unknown, free, or obstacle.
-5. Finds frontier cells next to explored free cells.
-6. Chooses the nearest frontier.
-7. Uses A* to plan a step toward that frontier.
-8. Sends one movement command at a time.
-9. Waits for Arduino `DONE:` before updating the robot position.
-10. Stops when no frontiers remain.
-11. Saves the final map to `latest_map.json`.
+1. Connects to the Arduino.
+2. Requests IR readings with `I`.
+3. Updates free and obstacle cells.
+4. Finds frontier cells.
+5. Plans the next step with A*.
+6. Sends one command at a time.
+7. Waits for Arduino `DONE:` messages.
+8. Saves the final map to `latest_map.json`.
 
-Grid colors:
+### 3. Run A* Planner
 
-| Color | Meaning |
-| --- | --- |
-| Gray | Unknown cell |
-| Green | Free cell |
-| Red | Obstacle cell |
-| Blue circle | Robot |
-| Blue `F` outline | Frontier cell |
-| Yellow line | Current planned path |
+```powershell
+python AStarPathPlanner.py
+```
 
-The robot heading values are:
+The planner:
 
-| Value | Heading |
-| --- | --- |
-| 0 | North |
-| 1 | East |
-| 2 | South |
-| 3 | West |
+- Loads `latest_map.json`.
+- Uses the saved robot position as the default start.
+- Uses `(3, 3)` as the default goal when it is free.
+- Lets you click cells to change start or goal.
+- Converts the path into Arduino commands.
+- Sends the command string to the Arduino when requested.
 
-## Saved Map Format
+Example output:
 
-`latest_map.json` stores the final map in this shape:
+```text
+Command array: ['forward', 'right', 'forward']
+Arduino command string: FRF
+```
+
+### 4. Open Browser Simulation
+
+Open this file directly in a browser:
+
+```text
+sim_3.html
+```
+
+No server, Python process, or Arduino is required for the simulation.
+
+## Map Format
+
+`latest_map.json` stores the map, final robot position, and final heading:
 
 ```json
 {
@@ -214,140 +225,93 @@ The robot heading values are:
 
 Grid values:
 
-- `0` = free or unknown in the exported planner map
-- `1` = obstacle
-
-Coordinates use `(x, y)`:
-
-- `x` = column
-- `y` = row
-- `(0, 0)` = top-left cell
-
-## Run The A* Path Planner
-
-After `latest_map.json` exists, run:
-
-```powershell
-python AStarPathPlanner.py
-```
-
-The planner:
-
-1. Loads `latest_map.json`.
-2. Uses the robot position from the saved map as the default start.
-3. Uses `(3, 3)` as the default goal if it is free.
-4. If `(3, 3)` is blocked, chooses the last free cell scanning from bottom-right.
-5. Lets you click cells to set a new start or goal.
-6. Lets you choose the starting heading.
-7. Calculates an A* shortest path.
-8. Converts the path into Arduino commands.
-9. Can send the command string to the Arduino.
-
-Example command output:
-
-```text
-Command array: ['forward', 'right', 'forward']
-Arduino command string: FRF
-```
-
-Planner grid colors:
-
-| Color | Meaning |
+| Value | Meaning |
 | --- | --- |
-| Green | Free cell |
-| Red | Obstacle cell |
-| Yellow | Planned path |
+| `0` | Free or unknown in the exported planner map |
+| `1` | Obstacle |
+
+Coordinates use `(x, y)`, where `x` is the column, `y` is the row, and `(0, 0)` is the top-left cell.
+
+## GUI Legend
+
+### Live Mapper
+
+| Visual | Meaning |
+| --- | --- |
+| Gray cell | Unknown |
+| Green cell | Free |
+| Red cell | Obstacle |
+| Blue circle | Robot |
+| White arrow | Robot heading |
+| Blue `F` outline | Frontier |
+| Yellow path | Current planned route |
+
+### A* Planner
+
+| Visual | Meaning |
+| --- | --- |
+| Green cell | Free |
+| Red cell | Obstacle |
+| Yellow cell | Planned path |
 | `S` marker | Start |
 | `G` marker | Goal |
 
-## Run The Browser Simulation
+## Heading Values
 
-Open this file in a browser:
-
-```text
-sim_3.html
-```
-
-It is a standalone visual simulation of the mapping algorithm and does not require Python, Arduino, or a server.
+| Value | Heading |
+| --- | --- |
+| `0` | North |
+| `1` | East |
+| `2` | South |
+| `3` | West |
 
 ## Recommended Workflow
 
-Use this order for the full robot workflow:
+```mermaid
+sequenceDiagram
+    participant User
+    participant Arduino
+    participant Mapper as MapTest_1.py
+    participant Map as latest_map.json
+    participant Planner as AStarPathPlanner.py
 
-1. Upload `MasterMotorControl_IR.ino` to the Arduino.
-2. Close Arduino Serial Monitor.
-3. Run `python MapTest_1.py`.
-4. Let the robot explore until the GUI says mapping is complete.
-5. Confirm `latest_map.json` was saved.
-6. Run `python AStarPathPlanner.py`.
-7. Select or confirm the start, goal, and heading.
-8. Review the command string.
-9. Click `Send to Arduino` if you want the robot to execute the planned route.
+    User->>Arduino: Upload firmware
+    User->>Mapper: Start live mapping
+    Mapper->>Arduino: Request IR with I
+    Arduino-->>Mapper: Return F,L,R
+    Mapper->>Arduino: Send F/R/L movement
+    Arduino-->>Mapper: Send DONE message
+    Mapper->>Map: Save discovered grid
+    User->>Planner: Open planner
+    Planner->>Map: Load saved grid
+    Planner-->>User: Show A* path and command string
+    User->>Planner: Send to Arduino
+```
 
 ## Troubleshooting
 
-### `pyserial is not installed`
+| Problem | Fix |
+| --- | --- |
+| `pyserial is not installed` | Run `pip install pyserial`. |
+| No serial ports found | Check USB cable, Arduino power, board drivers, and Device Manager. |
+| `Access is denied` on COM port | Close Arduino Serial Monitor, Serial Plotter, and other Python windows. |
+| Robot drives incorrectly | Check motor wiring, encoder wiring, battery voltage, and calibration constants. |
+| IR readings look reversed | Check `IR_OBSTACLE_IS_LOW` in the Arduino sketch. |
+| Planner says no path found | Choose a free start and goal cell, and confirm obstacles are correct in `latest_map.json`. |
 
-Install it:
+## Repository
 
-```powershell
-pip install pyserial
-```
-
-### No serial ports found
-
-Check that:
-
-- The Arduino is connected by USB.
-- The correct USB cable supports data, not only charging.
-- The Arduino driver is installed.
-- The board appears in Device Manager.
-
-### Access is denied on COM port
-
-Close anything else using the Arduino serial port:
-
-- Arduino Serial Monitor
-- Arduino Serial Plotter
-- Another Python window
-- Another terminal session
-
-Then run the Python script again.
-
-### Robot does not move correctly
-
-Check:
-
-- Motor wiring direction.
-- Encoder wiring.
-- Battery voltage.
-- Motor driver power.
-- Encoder count calibration constants.
-- Whether the robot is slipping on the floor.
-
-### IR readings look reversed
-
-If obstacles and free space are inverted, check this Arduino setting:
-
-```cpp
-const bool IR_OBSTACLE_IS_LOW = true;
-```
-
-Change it only if your sensor outputs the opposite logic.
-
-## GitHub Repository
-
-This project is stored in Git and pushed to:
+GitHub:
 
 ```text
 https://github.com/mohammednafees1007-hub/MapTestCode
 ```
 
-Useful Git commands:
+Useful commands:
 
 ```powershell
 git status
 git add README.md
-git commit -m "Add project documentation"
+git commit -m "Polish project README"
 git push
 ```
