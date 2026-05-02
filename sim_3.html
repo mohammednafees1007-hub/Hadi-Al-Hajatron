@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadi Al Hajatron - Mapping Algorithm Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e1b4b 100%);
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        /* Menu Screen */
+        .menu-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .menu-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-title {
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+        }
+
+        .menu-subtitle {
+            font-size: 2rem;
+            text-align: center;
+            color: #60a5fa;
+            margin-bottom: 3rem;
+            font-weight: 600;
+        }
+
+        .menu-button {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            margin-bottom: 1rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .menu-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+        }
+
+        .btn-about {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+        }
+
+        .btn-settings {
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            color: white;
+        }
+
+        /* Main Simulation Screen */
+        .simulation-screen {
+            display: none;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .simulation-screen.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+        }
+
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .grids-section {
+            flex: 1;
+        }
+
+        .grids-container {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-wrapper {
+            flex: 1;
+        }
+
+        .grid-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .setup-grid {
+            background: white;
+            padding: 1rem;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 60px);
+            gap: 0;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cell:hover {
+            transform: scale(0.95);
+        }
+
+        .cell.obstacle {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        .cell.start {
+            background: #10b981;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #10b981; }
+            50% { box-shadow: 0 0 20px #10b981, 0 0 30px #10b981; }
+        }
+
+        .exploration-grid {
+            background: rgba(76, 29, 149, 0.5);
+            padding: 1rem;
+            border-radius: 15px;
+            border: 3px solid #581c87;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .exploration-svg {
+            display: block;
+        }
+
+        .exploration-cell {
+            stroke: #4c1d95;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .exploration-cell.explored {
+            fill: #a78bfa;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .exploration-cell.frontier {
+            fill: #fbbf24;
+            animation: blink 1.5s infinite;
+        }
+
+        .exploration-cell.complete {
+            fill: #10b981;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .bot {
+            fill: #3b82f6;
+            stroke: #1e40af;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 10px #3b82f6);
+            animation: botPulse 2s infinite;
+        }
+
+        @keyframes botPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .trail {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 5px #3b82f6);
+        }
+
+        .sensor-arrow {
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: opacity 0.3s ease;
+        }
+
+        .sensor-arrow.active {
+            opacity: 1;
+            animation: sensorPulse 1s infinite;
+        }
+
+        .sensor-arrow.inactive {
+            opacity: 0.3;
+        }
+
+        @keyframes sensorPulse {
+            0%, 100% { stroke-width: 3; }
+            50% { stroke-width: 5; }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .control-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-obstacles {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-start-pos {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-run {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-step {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+
+        .btn-obstacles.active,
+        .btn-start-pos.active {
+            box-shadow: 0 0 20px currentColor;
+            animation: buttonGlow 1s infinite;
+        }
+
+        @keyframes buttonGlow {
+            0%, 100% { box-shadow: 0 0 20px currentColor; }
+            50% { box-shadow: 0 0 30px currentColor, 0 0 40px currentColor; }
+        }
+
+        /* Right Panel */
+        .right-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        /* Compass */
+        .compass {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+        }
+
+        .compass-circle {
+            width: 100%;
+            height: 100%;
+            border: 4px solid #60a5fa;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+        }
+
+        .compass-direction {
+            position: absolute;
+            color: #60a5fa;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .compass-n { top: -30px; left: 50%; transform: translateX(-50%); }
+        .compass-e { top: 50%; right: -30px; transform: translateY(-50%); }
+        .compass-s { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .compass-w { top: 50%; left: -30px; transform: translateY(-50%); }
+
+        .compass-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 60px;
+            background: #ef4444;
+            transform-origin: bottom center;
+            transition: transform 0.5s ease;
+            border-radius: 2px;
+        }
+
+        .compass-arrow::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #ef4444;
+        }
+
+        .direction-text {
+            text-align: center;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+
+        /* Sensor Status */
+        .sensor-status {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .sensor-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .sensor-label {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .sensor-label.forward { color: #10b981; }
+        .sensor-label.left { color: #fbbf24; }
+        .sensor-label.right { color: #a855f7; }
+
+        .sensor-value {
+            font-weight: 900;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+        }
+
+        .sensor-value.open {
+            background: #10b981;
+            color: white;
+        }
+
+        .sensor-value.blocked {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* JSON Map */
+        .json-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.3rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .json-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 900;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .json-cell.explored {
+            background: rgba(16, 185, 129, 0.5);
+            color: white;
+        }
+
+        .json-cell.frontier {
+            background: rgba(251, 191, 36, 0.5);
+            color: white;
+        }
+
+        .json-cell.unexplored {
+            background: rgba(107, 114, 128, 0.5);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        .stat-value.steps { color: #60a5fa; }
+        .stat-value.explored { color: #10b981; }
+        .stat-value.frontier { color: #fbbf24; }
+        .stat-value.status { color: #60a5fa; }
+        .stat-value.complete { color: #10b981; }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(96, 165, 250, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(96, 165, 250, 0.8);
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .right-panel {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .panel-card {
+                flex: 1;
+                min-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <div class="menu-screen" id="menuScreen">
+        <div class="menu-container">
+            <h1 class="menu-title">Mapping Algorithm</h1>
+            <h2 class="menu-subtitle">Hadi Al Hajatron</h2>
+            <button class="menu-button btn-start" onclick="showSimulation()">
+                <span style="position: relative; z-index: 1;">▶ Start Simulation</span>
+            </button>
+            <button class="menu-button btn-about">
+                <span style="position: relative; z-index: 1;">ℹ About Algorithm</span>
+            </button>
+            <button class="menu-button btn-settings">
+                <span style="position: relative; z-index: 1;">⚙ Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="simulation-screen" id="simulationScreen">
+        <div class="header">
+            <h1 class="title">Hadi Al Hajatron</h1>
+            <button class="menu-btn" onclick="showMenu()">◄ Menu</button>
+        </div>
+
+        <div class="main-content">
+            <div class="grids-section">
+                <div class="grids-container">
+                    <div class="grid-wrapper">
+                        <h3 class="grid-title">Setup Grid</h3>
+                        <div class="setup-grid">
+                            <div class="grid" id="setupGrid"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-wrapper">
+                        <h3 class="grid-title">Exploration</h3>
+                        <div class="exploration-grid">
+                            <svg class="exploration-svg" width="360" height="360" id="explorationSvg"></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn btn-obstacles" id="obstaclesBtn" onclick="toggleObstacles()">
+                        <span>🚧 Place Obstacles</span>
+                    </button>
+                    <button class="control-btn btn-start-pos" id="startPosBtn" onclick="toggleStartPosition()">
+                        <span>📍 Set Start</span>
+                    </button>
+                    <button class="control-btn btn-run" id="runBtn" onclick="startSimulation()">
+                        <span>▶ Start</span>
+                    </button>
+                    <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()" disabled>
+                        <span>⏸ Pause</span>
+                    </button>
+                    <button class="control-btn btn-step" id="stepBtn" onclick="nextStep()">
+                        <span>⏭ Next Step</span>
+                    </button>
+                    <button class="control-btn btn-reset" onclick="resetSimulation()">
+                        <span>🔄 Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="panel-card">
+                    <h3 class="panel-title">Direction</h3>
+                    <div class="compass">
+                        <div class="compass-circle">
+                            <div class="compass-direction compass-n">N</div>
+                            <div class="compass-direction compass-e">E</div>
+                            <div class="compass-direction compass-s">S</div>
+                            <div class="compass-direction compass-w">W</div>
+                            <div class="compass-arrow" id="compassArrow"></div>
+                        </div>
+                    </div>
+                    <div class="direction-text" id="directionText">North</div>
+                </div>
+
+                <div class="panel-card">
+                    <h3 class="panel-title">Sensor Readings</h3>
+                    <div class="sensor-status">
+                        <div class="sensor-row">
+                            <span class="sensor-label forward">Forward:</span>
+                            <span class="sensor-value blocked" id="sensorF">BLOCKED</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label left">Left:</span>
+                            <span class="sensor-value blocked" id="sensorL">BLOCKED</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label right">Right:</span>
+                            <span class="sensor-value blocked" id="sensorR">BLOCKED</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h3 class="panel-title">Internal Map (JSON)</h3>
+                    <div class="json-grid" id="jsonGrid"></div>
+                </div>
+
+                <div class="panel-card">
+                    <h3 class="panel-title">Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-row">
+                            <span class="stat-label">Steps:</span>
+                            <span class="stat-value steps" id="statSteps">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Explored:</span>
+                            <span class="stat-value explored" id="statExplored">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Frontier:</span>
+                            <span class="stat-value frontier" id="statFrontier">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Status:</span>
+                            <span class="stat-value status" id="statStatus">READY</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        const GRID_SIZE = 6;
+        const CELL_SIZE = 60;
+        
+        let state = {
+            obstacles: new Set(), // User placed obstacles (ground truth)
+            knownObstacles: new Set(), // Bot discovered obstacles
+            startPosition: null,
+            botPosition: null,
+            botDirection: 0, // 0:North, 1:East, 2:South, 3:West
+            exploredCells: new Set(),
+            frontierCells: new Set(),
+            botTrail: [],
+            isPlacingObstacles: false,
+            isPlacingStart: false,
+            isRunning: false,
+            isPaused: false,
+            currentStep: 0,
+            sensorReadings: { F: 0, L: 0, R: 0 },
+            jsonMap: {},
+            mappingComplete: false,
+            intervalId: null,
+            currentTargetKey: null // ADDED: Target Locking memory
+        };
+
+        const directionVectors = [
+            { dx: 0, dy: -1, name: 'North' },
+            { dx: 1, dy: 0, name: 'East' },
+            { dx: 0, dy: 1, name: 'South' },
+            { dx: -1, dy: 0, name: 'West' }
+        ];
+
+        // Initialize particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize grids
+        function initializeGrids() {
+            // Setup grid
+            const setupGrid = document.getElementById('setupGrid');
+            setupGrid.innerHTML = '';
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.onclick = () => handleSetupCellClick(col, row);
+                    setupGrid.appendChild(cell);
+                }
+            }
+
+            // Exploration grid
+            const svg = document.getElementById('explorationSvg');
+            svg.innerHTML = '';
+            
+            // Create cells
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', col * CELL_SIZE);
+                    rect.setAttribute('y', row * CELL_SIZE);
+                    rect.setAttribute('width', CELL_SIZE);
+                    rect.setAttribute('height', CELL_SIZE);
+                    rect.setAttribute('class', 'exploration-cell');
+                    rect.setAttribute('fill', 'transparent');
+                    rect.dataset.col = col;
+                    rect.dataset.row = row;
+                    svg.appendChild(rect);
+                }
+            }
+
+            // Initialize JSON grid
+            const jsonGrid = document.getElementById('jsonGrid');
+            jsonGrid.innerHTML = '';
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'json-cell unexplored';
+                    cell.dataset.col = col;
+                    cell.dataset.row = row;
+                    cell.textContent = '·';
+                    cell.title = `(${col},${row}): unexplored`;
+                    jsonGrid.appendChild(cell);
+                }
+            }
+        }
+
+        // Screen navigation
+        function showMenu() {
+            document.getElementById('menuScreen').style.display = 'flex';
+            document.getElementById('simulationScreen').classList.remove('active');
+            resetSimulation();
+        }
+
+        function showSimulation() {
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('simulationScreen').classList.add('active');
+        }
+
+        // Setup grid interactions
+        function handleSetupCellClick(col, row) {
+            const cellKey = `${col},${row}`;
+            const setupCells = document.querySelectorAll('#setupGrid .cell');
+            const cell = Array.from(setupCells).find(c => 
+                c.dataset.col == col && c.dataset.row == row
+            );
+
+            if (state.isPlacingObstacles) {
+                if (state.obstacles.has(cellKey)) {
+                    state.obstacles.delete(cellKey);
+                    cell.classList.remove('obstacle');
+                } else {
+                    if (state.startPosition && state.startPosition.x === col && state.startPosition.y === row) {
+                        return;
+                    }
+                    state.obstacles.add(cellKey);
+                    cell.classList.add('obstacle');
+                }
+            } else if (state.isPlacingStart) {
+                if (!state.obstacles.has(cellKey)) {
+                    // Clear previous start
+                    setupCells.forEach(c => c.classList.remove('start'));
+                    
+                    state.startPosition = { x: col, y: row };
+                    cell.classList.add('start');
+                    state.isPlacingStart = false;
+                    document.getElementById('startPosBtn').classList.remove('active');
+                }
+            }
+        }
+
+        function toggleObstacles() {
+            state.isPlacingObstacles = !state.isPlacingObstacles;
+            state.isPlacingStart = false;
+            
+            const obstaclesBtn = document.getElementById('obstaclesBtn');
+            const startPosBtn = document.getElementById('startPosBtn');
+            
+            if (state.isPlacingObstacles) {
+                obstaclesBtn.classList.add('active');
+            } else {
+                obstaclesBtn.classList.remove('active');
+            }
+            startPosBtn.classList.remove('active');
+        }
+
+        function toggleStartPosition() {
+            state.isPlacingStart = !state.isPlacingStart;
+            state.isPlacingObstacles = false;
+            
+            const obstaclesBtn = document.getElementById('obstaclesBtn');
+            const startPosBtn = document.getElementById('startPosBtn');
+            
+            if (state.isPlacingStart) {
+                startPosBtn.classList.add('active');
+            } else {
+                startPosBtn.classList.remove('active');
+            }
+            obstaclesBtn.classList.remove('active');
+        }
+
+        // Simulation logic
+        function isValidPosition(x, y) {
+            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return false;
+            return !state.obstacles.has(`${x},${y}`);
+        }
+
+        function getSensorDirections() {
+            const forward = state.botDirection;
+            const left = (state.botDirection + 3) % 4;
+            const right = (state.botDirection + 1) % 4;
+            return { forward, left, right };
+        }
+
+        function readSensors(x, y) {
+            const { forward, left, right } = getSensorDirections();
+            
+            const forwardPos = {
+                x: x + directionVectors[forward].dx,
+                y: y + directionVectors[forward].dy
+            };
+            const leftPos = {
+                x: x + directionVectors[left].dx,
+                y: y + directionVectors[left].dy
+            };
+            const rightPos = {
+                x: x + directionVectors[right].dx,
+                y: y + directionVectors[right].dy
+            };
+
+            return {
+                F: isValidPosition(forwardPos.x, forwardPos.y) ? 1 : 0,
+                L: isValidPosition(leftPos.x, leftPos.y) ? 1 : 0,
+                R: isValidPosition(rightPos.x, rightPos.y) ? 1 : 0
+            };
+        }
+
+        function updateSensorDisplay(sensors) {
+            state.sensorReadings = sensors;
+            
+            const sensorF = document.getElementById('sensorF');
+            const sensorL = document.getElementById('sensorL');
+            const sensorR = document.getElementById('sensorR');
+
+            sensorF.textContent = sensors.F ? 'OPEN' : 'BLOCKED';
+            sensorF.className = sensors.F ? 'sensor-value open' : 'sensor-value blocked';
+            
+            sensorL.textContent = sensors.L ? 'OPEN' : 'BLOCKED';
+            sensorL.className = sensors.L ? 'sensor-value open' : 'sensor-value blocked';
+            
+            sensorR.textContent = sensors.R ? 'OPEN' : 'BLOCKED';
+            sensorR.className = sensors.R ? 'sensor-value open' : 'sensor-value blocked';
+        }
+
+        // ==========================================
+        // STANDARD FBE (Frontier-Based Exploration)
+        // & A* PATHFINDING ALGORITHM
+        // ==========================================
+        
+        function updateInternalMap(sensors) {
+            const { forward, left, right } = getSensorDirections();
+            const pos = state.botPosition;
+
+            const checkSensor = (isActive, dir) => {
+                const target = {
+                    x: pos.x + directionVectors[dir].dx,
+                    y: pos.y + directionVectors[dir].dy
+                };
+                
+                // Out of bounds check
+                if (target.x < 0 || target.x >= GRID_SIZE || target.y < 0 || target.y >= GRID_SIZE) return;
+                
+                const key = `${target.x},${target.y}`;
+                
+                if (isActive) { // Free Space
+                    if (!state.exploredCells.has(key) && !state.knownObstacles.has(key)) {
+                        state.frontierCells.add(key);
+                    }
+                } else { // Obstacle
+                    state.knownObstacles.add(key);
+                    state.frontierCells.delete(key);
+                }
+            };
+
+            checkSensor(sensors.F, forward);
+            checkSensor(sensors.L, left);
+            checkSensor(sensors.R, right);
+        }
+
+        function manhattanDistance(a, b) {
+            return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+        }
+
+        function reconstructPath(cameFrom, current) {
+            const path = [current];
+            let currentKey = `${current.x},${current.y}`;
+            while (cameFrom.has(currentKey)) {
+                current = cameFrom.get(currentKey);
+                currentKey = `${current.x},${current.y}`;
+                path.unshift(current);
+            }
+            return path;
+        }
+
+        function astar(start, goal) {
+            const openSet = [start];
+            const cameFrom = new Map();
+            
+            const gScore = new Map();
+            const fScore = new Map();
+
+            const posToKey = p => `${p.x},${p.y}`;
+            gScore.set(posToKey(start), 0);
+            fScore.set(posToKey(start), manhattanDistance(start, goal));
+
+            while (openSet.length > 0) {
+                openSet.sort((a, b) => (fScore.get(posToKey(a)) ?? Infinity) - (fScore.get(posToKey(b)) ?? Infinity));
+                const current = openSet.shift();
+
+                if (current.x === goal.x && current.y === goal.y) {
+                    return reconstructPath(cameFrom, current);
+                }
+
+                const currentKey = posToKey(current);
+
+                const neighbors = [
+                    {x: current.x, y: current.y - 1}, // N
+                    {x: current.x + 1, y: current.y}, // E
+                    {x: current.x, y: current.y + 1}, // S
+                    {x: current.x - 1, y: current.y}  // W
+                ];
+
+                for (const neighbor of neighbors) {
+                    const neighborKey = posToKey(neighbor);
+
+                    if (neighbor.x < 0 || neighbor.x >= GRID_SIZE || neighbor.y < 0 || neighbor.y >= GRID_SIZE) continue;
+                    if (state.knownObstacles.has(neighborKey)) continue;
+
+                    const tentativeGScore = (gScore.get(currentKey) ?? Infinity) + 1;
+                    const neighborGScore = gScore.get(neighborKey) ?? Infinity;
+
+                    if (tentativeGScore < neighborGScore) {
+                        cameFrom.set(neighborKey, current);
+                        gScore.set(neighborKey, tentativeGScore);
+                        fScore.set(neighborKey, tentativeGScore + manhattanDistance(neighbor, goal));
+
+                        if (!openSet.some(n => n.x === neighbor.x && n.y === neighbor.y)) {
+                            openSet.push(neighbor);
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        function moveBot() {
+            if (!state.botPosition || state.mappingComplete) return;
+
+            // 1. Read Sensors & Update Map
+            const sensors = readSensors(state.botPosition.x, state.botPosition.y);
+            updateSensorDisplay(sensors);
+            updateInternalMap(sensors);
+
+            // 2. Refresh Frontiers & Target Lock
+            for (let f of state.frontierCells) {
+                if (state.exploredCells.has(f) || state.knownObstacles.has(f)) {
+                    state.frontierCells.delete(f);
+                }
+            }
+
+            // If current target is no longer a valid frontier, clear the lock
+            if (state.currentTargetKey && !state.frontierCells.has(state.currentTargetKey)) {
+                state.currentTargetKey = null;
+            }
+
+            // 3. Check Termination
+            if (state.frontierCells.size === 0) {
+                completeMapping();
+                return;
+            }
+
+            let bestPath = null;
+
+            // 4. If we have a locked target, try to plan a path to it
+            if (state.currentTargetKey) {
+                const [fx, fy] = state.currentTargetKey.split(',').map(Number);
+                bestPath = astar(state.botPosition, {x: fx, y: fy});
+                
+                // If a new obstacle blocked the path, clear the lock to pick a new target
+                if (!bestPath || bestPath.length < 2) {
+                    state.currentTargetKey = null;
+                    bestPath = null;
+                }
+            }
+
+            // 5. Evaluate all frontiers and LOCK ON to the best one based on requested Priorities
+            if (!state.currentTargetKey) {
+                let bestFrontier = null;
+                let maxForwardMotions = -1;
+                let shortestPathLength = Infinity;
+                let unreachableFrontiers = [];
+
+                for (let f of state.frontierCells) {
+                    const [fx, fy] = f.split(',').map(Number);
+                    const target = {x: fx, y: fy};
+                    
+                    const path = astar(state.botPosition, target);
+                    
+                    if (path && path.length > 1) {
+                        // Simulate driving the path to count forward motions
+                        let forwardCount = 0;
+                        let currentSimDir = state.botDirection;
+                        
+                        for (let i = 0; i < path.length - 1; i++) {
+                            let curr = path[i];
+                            let next = path[i+1];
+                            let requiredDir;
+                            
+                            if (next.y < curr.y) requiredDir = 0; // N
+                            else if (next.x > curr.x) requiredDir = 1; // E
+                            else if (next.y > curr.y) requiredDir = 2; // S
+                            else if (next.x < curr.x) requiredDir = 3; // W
+                            
+                            // If moving in the current facing direction, it's a forward motion
+                            if (requiredDir === currentSimDir) {
+                                forwardCount++;
+                            }
+                            // Update simulated facing direction
+                            currentSimDir = requiredDir;
+                        }
+
+                        // PRIORITY 1: Nearest Frontier (Shortest Path)
+                        // PRIORITY 2: Highest Forward Motions (Tie-Breaker)
+                        if (path.length < shortestPathLength || (path.length === shortestPathLength && forwardCount > maxForwardMotions)) {
+                            shortestPathLength = path.length;
+                            maxForwardMotions = forwardCount;
+                            bestFrontier = target;
+                            bestPath = path;
+                        }
+                    } else {
+                        unreachableFrontiers.push(f);
+                    }
+                }
+
+                // Cleanup unreachable frontiers
+                unreachableFrontiers.forEach(f => state.frontierCells.delete(f));
+
+                if (!bestPath || bestPath.length < 2) {
+                    if (state.frontierCells.size === 0) {
+                        completeMapping();
+                    }
+                    return;
+                }
+
+                // LOCK ON to the chosen frontier
+                state.currentTargetKey = `${bestFrontier.x},${bestFrontier.y}`;
+            }
+
+            // 6. Execute next step in best path
+            const nextCell = bestPath[1];
+            
+            let newDirection = state.botDirection;
+            if (nextCell.y < state.botPosition.y) newDirection = 0;
+            else if (nextCell.x > state.botPosition.x) newDirection = 1;
+            else if (nextCell.y > state.botPosition.y) newDirection = 2;
+            else if (nextCell.x < state.botPosition.x) newDirection = 3;
+
+            state.botPosition = { x: nextCell.x, y: nextCell.y };
+            state.botDirection = newDirection;
+            state.botTrail.push({ x: nextCell.x, y: nextCell.y });
+
+            const cellKey = `${nextCell.x},${nextCell.y}`;
+            state.exploredCells.add(cellKey);
+            state.frontierCells.delete(cellKey);
+            state.jsonMap[cellKey] = 'explored';
+
+            state.currentStep++;
+            updateVisualization();
+            updateStats();
+        }
+        // ==========================================
+
+        function completeMapping() {
+            state.mappingComplete = true;
+            state.isRunning = false;
+            
+            // Convert any remaining frontiers to explored (edge case cleanup)
+            state.frontierCells.forEach(cell => {
+                state.exploredCells.add(cell);
+                state.jsonMap[cell] = 'explored';
+            });
+            state.frontierCells.clear();
+
+            if (state.intervalId) {
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+            }
+
+            updateVisualization();
+            updateStats();
+            
+            document.getElementById('runBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('stepBtn').disabled = true;
+        }
+
+        function updateVisualization() {
+            const svg = document.getElementById('explorationSvg');
+            
+            // Clear existing trail and bot
+            svg.querySelectorAll('.trail, .bot, .sensor-arrow').forEach(el => el.remove());
+
+            // Update cells
+            const cells = svg.querySelectorAll('.exploration-cell');
+            cells.forEach(cell => {
+                const col = parseInt(cell.dataset.col);
+                const row = parseInt(cell.dataset.row);
+                const cellKey = `${col},${row}`;
+                
+                cell.classList.remove('explored', 'frontier', 'complete');
+                
+                if (state.mappingComplete && state.exploredCells.has(cellKey)) {
+                    cell.classList.add('complete');
+                } else if (state.exploredCells.has(cellKey)) {
+                    cell.classList.add('explored');
+                } else if (state.frontierCells.has(cellKey)) {
+                    cell.classList.add('frontier');
+                }
+            });
+
+            // Draw trail
+            if (state.botTrail.length > 1) {
+                const trail = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                const points = state.botTrail.map(p => `${p.x * CELL_SIZE + CELL_SIZE/2},${p.y * CELL_SIZE + CELL_SIZE/2}`).join(' ');
+                trail.setAttribute('points', points);
+                trail.setAttribute('class', 'trail');
+                svg.appendChild(trail);
+            }
+
+            // Draw sensor arrows
+            if (state.botPosition) {
+                const { forward, left, right } = getSensorDirections();
+                const arrowData = [
+                    { dir: forward, color: '#10b981', active: state.sensorReadings.F },
+                    { dir: left, color: '#fbbf24', active: state.sensorReadings.L },
+                    { dir: right, color: '#a855f7', active: state.sensorReadings.R }
+                ];
+
+                arrowData.forEach(({ dir, color, active }) => {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', state.botPosition.x * CELL_SIZE + CELL_SIZE/2);
+                    line.setAttribute('y1', state.botPosition.y * CELL_SIZE + CELL_SIZE/2);
+                    line.setAttribute('x2', state.botPosition.x * CELL_SIZE + CELL_SIZE/2 + directionVectors[dir].dx * 40);
+                    line.setAttribute('y2', state.botPosition.y * CELL_SIZE + CELL_SIZE/2 + directionVectors[dir].dy * 40);
+                    line.setAttribute('stroke', color);
+                    line.setAttribute('class', `sensor-arrow ${active ? 'active' : 'inactive'}`);
+                    svg.appendChild(line);
+                });
+
+                // Draw bot
+                const bot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                bot.setAttribute('cx', state.botPosition.x * CELL_SIZE + CELL_SIZE/2);
+                bot.setAttribute('cy', state.botPosition.y * CELL_SIZE + CELL_SIZE/2);
+                bot.setAttribute('r', 15);
+                bot.setAttribute('class', 'bot');
+                svg.appendChild(bot);
+            }
+
+            updateCompass();
+            updateJsonGrid();
+        }
+
+        function updateCompass() {
+            const arrow = document.getElementById('compassArrow');
+            const text = document.getElementById('directionText');
+            
+            arrow.style.transform = `translate(-50%, -100%) rotate(${state.botDirection * 90}deg)`;
+            text.textContent = directionVectors[state.botDirection].name;
+        }
+
+        function updateJsonGrid() {
+            const cells = document.querySelectorAll('#jsonGrid .json-cell');
+            cells.forEach(cell => {
+                const col = parseInt(cell.dataset.col);
+                const row = parseInt(cell.dataset.row);
+                const cellKey = `${col},${row}`;
+                
+                cell.classList.remove('explored', 'frontier', 'unexplored');
+                
+                if (state.exploredCells.has(cellKey)) {
+                    cell.classList.add('explored');
+                    cell.textContent = 'E';
+                    cell.title = `(${col},${row}): explored`;
+                } else if (state.frontierCells.has(cellKey)) {
+                    cell.classList.add('frontier');
+                    cell.textContent = 'F';
+                    cell.title = `(${col},${row}): frontier`;
+                } else {
+                    cell.classList.add('unexplored');
+                    cell.textContent = '·';
+                    cell.title = `(${col},${row}): unexplored`;
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('statSteps').textContent = state.currentStep;
+            document.getElementById('statExplored').textContent = state.exploredCells.size;
+            document.getElementById('statFrontier').textContent = state.frontierCells.size;
+            
+            const statusEl = document.getElementById('statStatus');
+            if (state.mappingComplete) {
+                statusEl.textContent = 'COMPLETE';
+                statusEl.classList.add('complete');
+            } else if (state.isRunning) {
+                statusEl.textContent = state.isPaused ? 'PAUSED' : 'RUNNING';
+                statusEl.classList.remove('complete');
+            } else {
+                statusEl.textContent = 'READY';
+                statusEl.classList.remove('complete');
+            }
+        }
+
+        // Control functions
+        function startSimulation() {
+            if (!state.startPosition) {
+                alert('Please set a start position first!');
+                return;
+            }
+
+            if (state.isRunning) return;
+
+            state.botPosition = { ...state.startPosition };
+            state.botDirection = 0;
+            const startKey = `${state.startPosition.x},${state.startPosition.y}`;
+            state.exploredCells.add(startKey);
+            state.botTrail = [{ ...state.startPosition }];
+            state.jsonMap[startKey] = 'explored';
+            state.isRunning = true;
+            state.isPaused = false;
+            state.mappingComplete = false;
+            state.currentTargetKey = null; // Reset target lock
+
+            document.getElementById('runBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('stepBtn').disabled = true;
+
+            updateVisualization();
+            updateStats();
+
+            state.intervalId = setInterval(() => {
+                if (!state.isPaused && !state.mappingComplete) {
+                    moveBot();
+                }
+            }, 800);
+        }
+
+        function togglePause() {
+            state.isPaused = !state.isPaused;
+            const pauseBtn = document.getElementById('pauseBtn');
+            pauseBtn.innerHTML = state.isPaused ? '<span>▶ Resume</span>' : '<span>⏸ Pause</span>';
+        }
+
+        function nextStep() {
+            if (state.isRunning || state.mappingComplete) return;
+            
+            if (!state.botPosition) {
+                if (!state.startPosition) {
+                    alert('Please set a start position first!');
+                    return;
+                }
+                state.botPosition = { ...state.startPosition };
+                state.botDirection = 0;
+                const startKey = `${state.startPosition.x},${state.startPosition.y}`;
+                state.exploredCells.add(startKey);
+                state.botTrail = [{ ...state.startPosition }];
+                state.jsonMap[startKey] = 'explored';
+                state.currentTargetKey = null; // Reset target lock
+                updateVisualization();
+                updateStats();
+                return;
+            }
+
+            moveBot();
+        }
+
+        function resetSimulation() {
+            if (state.intervalId) {
+                clearInterval(state.intervalId);
+                state.intervalId = null;
+            }
+
+            state.botPosition = null;
+            state.botDirection = 0;
+            state.exploredCells.clear();
+            state.frontierCells.clear();
+            state.knownObstacles.clear();
+            state.botTrail = [];
+            state.isRunning = false;
+            state.isPaused = false;
+            state.currentStep = 0;
+            state.sensorReadings = { F: 0, L: 0, R: 0 };
+            state.jsonMap = {};
+            state.mappingComplete = false;
+            state.currentTargetKey = null; // Reset target lock
+
+            document.getElementById('runBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').innerHTML = '<span>⏸ Pause</span>';
+            document.getElementById('stepBtn').disabled = false;
+
+            updateVisualization();
+            updateStats();
+            updateSensorDisplay({ F: 0, L: 0, R: 0 });
+        }
+
+        // Initialize
+        createParticles();
+        initializeGrids();
+        updateStats();
+    </script>
+</body>
+</html>
