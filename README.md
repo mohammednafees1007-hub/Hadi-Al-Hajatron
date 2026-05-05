@@ -1,13 +1,13 @@
-# MapTestCode
+# Hadi Al Hajatron
 
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Arduino](https://img.shields.io/badge/Arduino-Firmware-00979D?style=for-the-badge&logo=arduino&logoColor=white)
 ![Tkinter](https://img.shields.io/badge/GUI-Tkinter-2E7D32?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-0F766E?style=for-the-badge)
 
-**A Python + Arduino robot mapping system with live frontier exploration, IR obstacle sensing, encoder-based movement, saved map output, and A* path planning.**
+**A Python + Arduino grid-based navigation robot with live frontier exploration, IR obstacle sensing, encoder-based movement, saved map output, and A* path planning.**
 
-MapTestCode connects a desktop Python GUI to an Arduino-powered robot. The robot explores a 4x4 grid, reads front/left/right IR sensors, marks free and blocked cells, saves the discovered map, and then uses A* to plan a route through the explored world.
+Hadi Al Hajatron connects a desktop Python GUI to an Arduino-powered navigation robot. It explores a 4x4 grid, reads front/left/right IR sensors, marks free and blocked cells, saves the discovered map, and then uses A* to plan a route through the explored world.
 
 ## Highlights
 
@@ -23,7 +23,7 @@ MapTestCode connects a desktop Python GUI to an Arduino-powered robot. The robot
 ## Repository Layout
 
 ```text
-MapTestCode/
+Hadi-Al-Hajatron/
 |-- AStarPathPlanner.py        # Tkinter A* path planner and command sender
 |-- MapTest_1.py               # Live robot mapping GUI
 |-- MasterMotorControl_IR.ino  # Arduino motor, encoder, IR, and serial firmware
@@ -37,7 +37,7 @@ MapTestCode/
 
 ```mermaid
 flowchart LR
-    A["Arduino robot"] -->|"IR readings: F,L,R"| B["MapTest_1.py"]
+    A["Hadi Al Hajatron"] -->|"IR readings: F,L,R"| B["MapTest_1.py"]
     B -->|"movement command: F/R/L/S/I"| A
     B -->|"saves map"| C["latest_map.json"]
     C --> D["AStarPathPlanner.py"]
@@ -48,7 +48,7 @@ flowchart LR
 
 ## Hardware
 
-The Arduino sketch expects:
+The Arduino sketch expects the Hadi Al Hajatron hardware to include:
 
 - Two DC motors connected through a PWM motor driver.
 - Left and right wheel encoders.
@@ -304,7 +304,7 @@ sequenceDiagram
 GitHub:
 
 ```text
-https://github.com/mohammednafees1007-hub/MapTestCode
+https://github.com/mohammednafees1007-hub/Hadi-Al-Hajatron
 ```
 
 Useful commands:
