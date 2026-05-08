@@ -20,11 +20,18 @@ Hadi Al Hajatron connects a desktop Python GUI to an Arduino-powered navigation 
 | A* route planner | Loads the saved map, lets you choose start/goal cells, and creates Arduino commands. |
 | Browser simulation | Provides a standalone HTML mapping visualization demo. |
 
+## Project Report
+
+The cleaned project report is available here:
+
+[Hadi-Al-Hajatron-Report.pdf](Hadi-Al-Hajatron-Report.pdf)
+
 ## Repository Layout
 
 ```text
 Hadi-Al-Hajatron/
 |-- AStarPathPlanner.py        # Tkinter A* path planner and command sender
+|-- Hadi-Al-Hajatron-Report.pdf # Cleaned project report
 |-- MapTest_1.py               # Live robot mapping GUI
 |-- MasterMotorControl_IR.ino  # Arduino motor, encoder, IR, and serial firmware
 |-- latest_map.json            # Saved mapping output
