@@ -26,6 +26,11 @@ The cleaned project report is available here:
 
 [Hadi-Al-Hajatron-Report.pdf](Hadi-Al-Hajatron-Report.pdf)
 
+## Demo Videos
+
+- [FBE mapping and A* path output](https://drive.google.com/file/d/1guCm4QYnMYOHiRjrAKDh5w8sXYH0lnsS/view?usp=sharing)
+- [Project simulation video](https://drive.google.com/file/d/1iZEhApimRnLMOh4Wx2o7xYoT5nfrdVpN/view?usp=sharing)
+
 ## Repository Layout
 
 ```text
