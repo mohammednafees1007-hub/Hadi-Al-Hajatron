@@ -9,6 +9,12 @@
 
 Hadi Al Hajatron connects a desktop Python GUI to an Arduino-powered navigation robot. It explores a 4x4 grid, reads front/left/right IR sensors, marks free and blocked cells, saves the discovered map, and then uses A* to plan a route through the explored world.
 
+<p align="center">
+  <a href="README_NON_TECH.md">
+    <img src="https://img.shields.io/badge/FOR_NON_TECH_PEOPLE-CLICK_HERE_TO_UNDERSTAND_THIS_PROJECT-0F766E?style=for-the-badge" alt="For non tech people: click here to understand this project">
+  </a>
+</p>
+
 ## Highlights
 
 | Feature | What It Does |
@@ -39,6 +45,7 @@ Hadi-Al-Hajatron/
 |-- Hadi-Al-Hajatron-Report.pdf # Cleaned project report
 |-- MapTest_1.py               # Live robot mapping GUI
 |-- MasterMotorControl_IR.ino  # Arduino motor, encoder, IR, and serial firmware
+|-- README_NON_TECH.md         # Beginner-friendly explanation
 |-- latest_map.json            # Saved mapping output
 |-- sim_3.html                 # Standalone browser simulation
 |-- .gitignore                 # Python cache ignore rules
