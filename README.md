@@ -15,6 +15,15 @@ Hadi Al Hajatron connects a desktop Python GUI to an Arduino-powered navigation 
   </a>
 </p>
 
+## Quick Navigation
+
+| Want to see... | Open this |
+| --- | --- |
+| Simple explanation for non-technical readers | [README_NON_TECH.md](README_NON_TECH.md) |
+| Full public project report | [Hadi-Al-Hajatron-Report.pdf](Hadi-Al-Hajatron-Report.pdf) |
+| Real robot mapping demo | [FBE mapping and A* path output](https://drive.google.com/file/d/1guCm4QYnMYOHiRjrAKDh5w8sXYH0lnsS/view?usp=sharing) |
+| Simulation demo | [Project simulation video](https://drive.google.com/file/d/1iZEhApimRnLMOh4Wx2o7xYoT5nfrdVpN/view?usp=sharing) |
+
 ## Highlights
 
 | Feature | What It Does |
